@@ -5,3 +5,12 @@ add_library(oec-demo SHARED
     OECProcessor.cpp
     OECClassifier.cpp
 )
+
+add_executable(oec-daq
+    DAQEmulator.cpp
+    demo.cpp
+)
+
+target_link_libraries(oec-daq
+    oec-demo
+)
