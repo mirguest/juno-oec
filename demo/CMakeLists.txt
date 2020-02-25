@@ -4,6 +4,8 @@ add_library(oec-demo SHARED
     OECConfigMgr.cpp
     OECProcessor.cpp
     OECClassifier.cpp
+
+    DataHelper.cpp
 )
 
 add_executable(oec-daq

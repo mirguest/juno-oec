@@ -8,6 +8,8 @@
  *
  */
 
+#include <stdint.h>
+
 /*
  * An event data model including
  * * event timestamp (4+4 bytes)
@@ -34,5 +36,12 @@ struct Event {
 /*
  * Data Decoding is a helper class to decode the input data.
  */
+struct DataDecoding {
+
+    // buffer is input, event is output
+    static bool decode(const uint32_t* buffer, Event& event);
+
+};
+
 
 #endif
