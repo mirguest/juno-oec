@@ -3,6 +3,8 @@
 #include "OECController.h"
 #include "DataHelper.h"
 
+#include "OECTypes.h"
+
 OECController::OECController() {
 
 }
@@ -22,9 +24,12 @@ const uint32_t* OECController::execute(const uint32_t* buffer) {
     Event event;
     DataDecoding::decode(buffer, event);
 
-    // more calculation
-
-    // decision
+    while (OECStep* step = next()) {
+        // more calculation
+        
+        // decision: get the OECTag
+        OECTag tag = Unknown;
+    }
 
     return 0;
 }
