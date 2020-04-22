@@ -15,7 +15,7 @@ class OECStep {
 public:
     OECStep();
 
-    bool ();
+    bool dostep();
 private:
     OECProcessor* processor;
     OECClassifier* classifier;
