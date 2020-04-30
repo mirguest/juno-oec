@@ -4,6 +4,7 @@
 #include "DataHelper.h"
 
 #include "OECTypes.h"
+#include "OECStep.h"
 
 OECController::OECController() {
 
@@ -26,7 +27,7 @@ const uint32_t* OECController::execute(const uint32_t* buffer) {
 
     while (OECStep* step = next()) {
         // more calculation
-        
+        step->dostep();
         // decision: get the OECTag
         OECTag tag = Unknown;
     }
