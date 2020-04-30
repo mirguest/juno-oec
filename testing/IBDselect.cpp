@@ -3,7 +3,12 @@
 #include <vector>
 #include <map>
 
+struct CutRange {
+    double low;
+    double high;
+};
 
+// 8bit
 enum tECut: unsigned {
     tEless0d75MeV,
     tEless1d60MeV,
@@ -15,11 +20,6 @@ enum tECut: unsigned {
     tEAny = 0xFF
 };
 
-struct CutRange {
-    double low;
-    double high;
-};
-
 CutRange tEcutRange[] = {
     {0, 0.75},
     {0, 1.6},
@@ -29,23 +29,35 @@ CutRange tEcutRange[] = {
     {100, 0}
 };
 
+// 4bit
 enum pECut: unsigned {
     pEless100MeV,
-    pEless1GeV,
-    pEgreat1GeV,
     pEgreat100MeV, // this label will cover pEless1GeV and pEgreat1GeV
     pENum, // total number
-    pEAny = 0xFF
+    pEAny = 0xF
 };
 
 CutRange pEcutRange[] = {
     {0, 100},
-    {0, 1000},
-    {1000, 0},
     {100, 0}
 };
 
+// 4bit
+enum pE2Cut: unsigned {
+    pE2less100MeV,
+    pE2less1GeV,
+    pE2great1GeV,
+    pE2Num, // total number
+    pE2Any = 0xF
+};
 
+CutRange pE2cutRange[] = {
+    {0, 100},
+    {0, 1000},
+    {1000, 0},
+};
+
+// 8bit
 enum distCut: unsigned {
     distless2d5m,
     distgreat2d5m,
@@ -58,6 +70,7 @@ CutRange distcutRange[] {
     {2500, 0}
 };
 
+// 8bit
 enum timeCut: unsigned {
     timeless10us,
     timegreat10us,
@@ -79,41 +92,47 @@ enum Tag: unsigned {
     tagProtonDecay
 };
 
-#define MASK(TE, PE, DI, TI) ((TE<<24) | (PE<<16) | (DI<<8) | (TI)), (TE), (PE), (DI), (TI)
-
+// #define MASK(TE, PE, DI, TI) ((TE<<24) | (PE<<16) | (DI<<8) | (TI)), (TE), (PE), (DI), (TI)
+// #define MASK(TE, PE, PE2, DI, TI) (TE), (PE), (PE2), (DI), (TI)
+#define MASK(TE, PE, PE2, DI, TI) (( TE<<24) | \
+                                   ( PE<<20) | \
+                                   (PE2<<16) | \
+                                   ( DI<< 8) | \
+                                   ( TI<< 0)),                            \
+                                   (TE), (PE), (PE2), (DI), (TI)
 struct Pair {
     unsigned int selection;
     enum tECut _tEcut;
     enum pECut _pEcut;
+    enum pE2Cut _pE2cut;
     enum distCut _distcut;
     enum timeCut _timecut;
-    unsigned int tag;
+    Tag tag;
 } tables[] = {
     // sorted from small to large
 
-    {MASK(tEless0d75MeV, pEAny,         distAny,       timeAny),       tagUnknown},
+    {MASK(tEless0d75MeV, pEAny,         pE2Any, distAny,       timeAny),       tagUnknown},
 
-    {MASK(tEless1d60MeV, pEless100MeV,  distless2d5m,  timeAny),       tagCoinc},
-    {MASK(tEless1d60MeV, pEless100MeV,  distgreat2d5m, timeAny),       tagUnknown},
-    {MASK(tEless1d60MeV, pEgreat100MeV, distAny,       timeAny),       tagSpallationNeutron},
+    {MASK(tEless1d60MeV, pEless100MeV,  pE2Any, distless2d5m,  timeAny),       tagCoinc},
+    {MASK(tEless1d60MeV, pEless100MeV,  pE2Any, distgreat2d5m, timeAny),       tagUnknown},
+    {MASK(tEless1d60MeV, pEgreat100MeV, pE2Any, distAny,       timeAny),       tagSpallationNeutron},
 
-    {MASK(tEless2d60MeV, pEless100MeV,  distless2d5m,  timeAny),       tagIBD},
-    {MASK(tEless2d60MeV, pEless100MeV,  distgreat2d5m, timeAny),       tagUnknown},
-    {MASK(tEless2d60MeV, pEgreat100MeV, distAny,       timeAny),       tagSpallationNeutron},
+    {MASK(tEless2d60MeV, pEless100MeV,  pE2Any, distless2d5m,  timeAny),       tagIBD},
+    {MASK(tEless2d60MeV, pEless100MeV,  pE2Any, distgreat2d5m, timeAny),       tagUnknown},
+    {MASK(tEless2d60MeV, pEgreat100MeV, pE2Any, distAny,       timeAny),       tagSpallationNeutron},
 
-    {MASK(tEless3d50MeV, pEless100MeV,  distless2d5m,  timeAny),       tagCoinc},
-    {MASK(tEless3d50MeV, pEless100MeV,  distgreat2d5m, timeAny),       tagUnknown},
-    {MASK(tEless3d50MeV, pEgreat100MeV, distAny,       timeAny),       tagSpallationNeutron},
+    {MASK(tEless3d50MeV, pEless100MeV,  pE2Any, distless2d5m,  timeAny),       tagCoinc},
+    {MASK(tEless3d50MeV, pEless100MeV,  pE2Any, distgreat2d5m, timeAny),       tagUnknown},
+    {MASK(tEless3d50MeV, pEgreat100MeV, pE2Any, distAny,       timeAny),       tagSpallationNeutron},
 
-    {MASK(tEless100MeV,  pEless100MeV,  distAny,       timeAny),       tagUnknown},
-    {MASK(tEless100MeV,  pEless1GeV,    distAny,       timeless10us),  tagProtonDecay},
-    {MASK(tEless100MeV,  pEless1GeV,    distAny,       timegreat10us), tagUnknown},
-    {MASK(tEless100MeV,  pEgreat1GeV,   distAny,       timeAny),       tagUnknown},
+    {MASK(tEless100MeV,  pEAny,  pE2less100MeV, distAny,       timeAny),       tagUnknown},
+    {MASK(tEless100MeV,  pEAny,    pE2less1GeV, distAny,       timeless10us),  tagProtonDecay},
+    {MASK(tEless100MeV,  pEAny,    pE2less1GeV, distAny,       timegreat10us), tagUnknown},
+    {MASK(tEless100MeV,  pEAny,   pE2great1GeV, distAny,       timeAny),       tagUnknown},
 
-    {MASK(tEgreat100MeV, pEAny,         distAny,       timeAny),       tagUnknown},
+    {MASK(tEgreat100MeV, pEAny,         pE2Any, distAny,       timeAny),       tagUnknown},
 
-
-    {MASK(tEAny,         pEAny,         distAny, timeAny),             tagUnknown} // the last one
+    {MASK(tEAny,         pEAny,         pE2Any, distAny,       timeAny),       tagUnknown} // the last one
 };
 
 struct IBDselect {
@@ -149,22 +168,56 @@ struct IBDselect {
 
         enum tECut _tEcut = get_tEcut(tE);
         enum pECut _pEcut = get_pEcut(pE);
+        enum pE2Cut _pE2cut = get_pE2cut(pE);
         enum distCut _distcut = get_distcut(dist);
         enum timeCut _timecut = get_timecut(dist);
 
-        unsigned mask = 0;
+        Tag tag = tagUnknown;
 
+        std::cout << " tE: " << tE
+                  << " pE: " << pE
+                  << " dist: " << dist
+                  << " time: " << time
+                  << std::endl;
         std::cout << " tECut: " << _tEcut
                   << " pECut: " << _pEcut
                   << " distCut: " << _distcut
                   << " timeCut: " << _timecut
                   << std::endl;
 
+        
+
         for (Pair* p = tables; p->selection != 0xFFFFFFFF; ++p) {
+            if (p->_tEcut != tEAny && _tEcut != p->_tEcut) {
+                continue;
+            }
+
+            if (p->_pEcut != pEAny && _pEcut != p->_pEcut) {
+                continue;
+            }
+
+            if (p->_pE2cut != pE2Any && _pE2cut != p->_pE2cut) {
+                continue;
+            }
+
+            if (p->_distcut != distAny && _distcut != p->_distcut) {
+                continue;
+            }
+
+            if (p->_timecut != timeAny && _timecut != p->_timecut) {
+                continue;
+            }
+
+            // found the tag
+            tag = p->tag;
+
+            break;
 
         }
 
-        return tagUnknown;
+        std::cout << " found Tag: " << tag << std::endl;
+
+        return tag;
     }
 
     enum tECut get_tEcut(float tE) {
@@ -201,6 +254,24 @@ struct IBDselect {
         }
 
         return _pEcut;
+    }
+
+    enum pE2Cut get_pE2cut(float pE) {
+        enum pE2Cut _pE2cut = pE2Any;
+
+        for (unsigned int i = 0; i < pE2Num; ++i) {
+            if (pE < pE2cutRange[i].low) {
+                continue;
+            }
+            if (pE2cutRange[i].high != 0 && pE > pE2cutRange[i].high) {
+                continue;
+            }
+            // in the range
+            _pE2cut = pE2Cut(i);
+            break;
+        }
+
+        return _pE2cut;
     }
 
     enum distCut get_distcut(float dist) {
